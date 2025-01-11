@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>DreamCanvas - Creative for All</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet" />
+</head>
+<body class="bg-yellow-500 text-gray-900">
+    <div class="app-container flex flex-col h-screen justify-between">
+        <!-- Header Section -->
+        <header class="app-header p-4 bg-orange-500 text-white text-center">
+            <h1 class="text-3xl font-bold">🎨 DreamCanvas</h1>
+            <p class="text-lg">Creative expression for everyone, powered by AI.</p>
+        </header>
+
+        <!-- Main Content -->
+        <main class="app-main flex-grow flex flex-col items-center justify-center gap-8">
+            <!-- Video Feed -->
+            <div class="video-container">
+                <img
+                    src="/video_feed"
+                    alt="Your Canvas"
+                    class="rounded-2xl shadow-lg border-4 border-dashed border-orange-400"
+                />
+            </div>
+
+            <!-- Controls -->
+            <div class="controls flex gap-4 flex-wrap justify-center">
+                <button
+                    class="bg-blue-500 text-white px-4 py-2 rounded-full shadow-md hover:bg-blue-700 transform hover:scale-110 transition-all duration-300"
+                    onclick="undo()"
+                >
+                    ↩️ Undo
+                </button>
+                <button
+                    class="bg-blue-500 text-white px-4 py-2 rounded-full shadow-md hover:bg-blue-700 transform hover:scale-110 transition-all duration-300"
+                    onclick="redo()"
+                >
+                    ↪️ Redo
+                </button>
+                <button
+                    class="bg-blue-500 text-white px-4 py-2 rounded-full shadow-md hover:bg-blue-700 transform hover:scale-110 transition-all duration-300"
+                    onclick="resetCanvas()"
+                >
+                    🧹 Reset
+                </button>
+                <button
+                    class="bg-blue-500 text-white px-4 py-2 rounded-full shadow-md hover:bg-blue-700 transform hover:scale-110 transition-all duration-300"
+                    onclick="saveCanvas()"
+                >
+                    💾 Save
+                </button>
+            </div>
+
+            <!-- Settings -->
+            <div class="settings flex gap-4 flex-wrap justify-center items-center">
+                <label for="brushSize" class="text-lg">🖌️ Brush Size:</label>
+                <input
+                    id="brushSize"
+                    type="range"
+                    min="1"
+                    max="20"
+                    value="4"
+                    class="w-48 accent-orange-500"
+                    onchange="updateBrushSettings()"
+                />
+                <label for="brushColor" class="text-lg">🎨 Brush Color:</label>
+                <input
+                    id="brushColor"
+                    type="color"
+                    value="#ff4081"
+                    class="border-2 border-gray-300 rounded-lg"
+                    onchange="updateBrushSettings()"
+                />
+            </div>
+        </main>
+
+        <!-- Footer Section -->
+        <footer class="app-footer p-4 bg-orange-500 text-white text-center">
+            <p>© 2025 DreamCanvas | Creativity Without Limits</p>
+        </footer>
+    </div>
+
+    <!-- JavaScript Logic -->
+    <script>
+        function updateBrushSettings() {
+            const brushSize = document.getElementById("brushSize").value;
+            const brushColor = document.getElementById("brushColor").value;
+
+            fetch("/update_settings", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ brush_size: brushSize, brush_color: brushColor }),
+            }).then((response) => console.log("Brush settings updated"));
+        }
+
+        function resetCanvas() {
+            fetch("/reset_canvas", { method: "POST" }).then((response) => console.log("Canvas reset"));
+        }
+
+        function undo() {
+            fetch("/undo", { method: "POST" }).then((response) => console.log("Undo action performed"));
+        }
+
+        function redo() {
+            fetch("/redo", { method: "POST" }).then((response) => console.log("Redo action performed"));
+        }
+
+        function saveCanvas() {
+            fetch("/save_canvas", { method: "GET" })
+                .then((response) => response.json())
+                .then((data) => {
+                    if (data.status === "saved") {
+                        const link = document.createElement("a");
+                        link.href = `/${data.filename}`;
+                        link.download = "drawing.png";
+                        link.click();
+                        console.log("Canvas saved:", data.filename);
+                    } else {
+                        alert(data.message);
+                    }
+                });
+        }
+    </script>
+</body>
+</html>
